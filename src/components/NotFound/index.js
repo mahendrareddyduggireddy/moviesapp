@@ -19,6 +19,7 @@ const NotFound = () => (
         Go to Home
       </button>
     </Link>
+    <p>retry</p>
   </div>
 )
 export default NotFound
