@@ -1,0 +1,28 @@
+.movies-all {
+  padding-bottom: 32px;
+  min-height: 100vh;
+  background-color: black;
+  color: white;
+}
+
+.movies-container {
+  width: 90%;
+  margin: auto;
+  margin-bottom: 32px;
+  background-color: transparent;
+}
+
+.movie-style {
+  height: 200px;
+  width: 200px;
+  margin: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 9px;
+}
+
+@media screen and (min-width: 768px) {
+  .movies-container {
+    max-width: 1110px;
+  }
+}
