@@ -95,9 +95,9 @@ class Home extends Component {
 
             <Slider {...settings}>
               {trendsList.map(each => (
-                <div key={each.id} className="movie-style">
-                  <img src={each.posterPath} alt={each.name} />
-                </div>
+               
+                  <img src={each.posterPath} alt={each.name} key={each.id} className="movie-style"/>
+               
               ))}
             </Slider>
 
@@ -105,9 +105,9 @@ class Home extends Component {
 
             <Slider {...settings}>
               {originalsList.map(each => (
-                <div key={each.id} className="movie-style">
-                  <img src={each.posterPath} alt={each.name} />
-                </div>
+                
+                  <img src={each.posterPath} alt={each.name} key={each.id} className="movie-style"/>
+                
               ))}
             </Slider>
           </div>
