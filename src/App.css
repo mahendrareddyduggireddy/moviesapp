@@ -10,12 +10,3 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.app-container {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 50px;
-  background-color: aqua;
-}

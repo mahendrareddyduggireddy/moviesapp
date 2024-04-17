@@ -1,19 +1,25 @@
 import './App.css'
-import {Switch, Route} from 'react-router-dom'
-import NotFound from './components/NotFound'
-import Home from './components/Home'
+import {Switch, Route, Redirect} from 'react-router-dom'
 import Login from './components/Login'
+import Home from './components/Home'
+import Popular from './components/PopularRoute'
+import ProtectedRoute from './components/ProtectedRoute'
+import NotFound from './components/NotFound'
+import MovieDetailView from './components/MovieDetailsView'
+import SearchFilter from './components/Search'
 import Account from './components/Account'
 
 const App = () => (
-  <div className="app-container">
-    <Switch>
-      <Route exact path="/" component={Home} />
-      <Route exact path="/login" component={Login} />
-      <Route exact path="/account" component={Account} />
-      <Route component={NotFound} />
-    </Switch>
-  </div>
+  <Switch>
+    <Route exact path="/login" component={Login} />
+    <ProtectedRoute exact path="/" component={Home} />
+    <ProtectedRoute exact path="/popular" component={Popular} />
+    <ProtectedRoute exact path="/movies/:id" component={MovieDetailView} />
+    <ProtectedRoute exact path="/search" component={SearchFilter} />
+    <ProtectedRoute exact path="/account" component={Account} />
+    <Route path="/not-found" component={NotFound} />
+    <Redirect to="not-found" />
+  </Switch>
 )
 
 export default App

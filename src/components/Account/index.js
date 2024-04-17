@@ -1,41 +1,50 @@
-import './index.css'
 import Cookies from 'js-cookie'
-import {Redirect} from 'react-router-dom'
+import Header from '../Header'
+import Footer from '../Footer'
+import './index.css'
 
 const Account = props => {
-  const {history} = props
-  const logoutFunc = () => {
+  const username = localStorage.getItem('username')
+  const password = localStorage.getItem('password')
+
+  const passwordInAsterisk = '*'.repeat(password.length)
+  const onClickLogout = () => {
+    const {history} = props
     Cookies.remove('jwt_token')
     history.replace('/login')
   }
-  if (Cookies.get('jwt_token') === undefined) {
-    return <Redirect to="/login" />
-  }
+
   return (
-    <div className="account-container">
-      <h1>Account</h1>
-      <hr />
-      <div>
-        <p>Member ship</p>
-        <div>
-          <p>rahul@gmail.com</p>
-          <p>
-            Password<span>:*********</span>
-          </p>
+    <div className="account-root-container">
+      <Header />
+      <div className="account-details-container">
+        <h1 className="account-heading">Account</h1>
+        <hr className="hr-line" />
+        <div className="member-details-container">
+          <p className="membership-heading">Membership</p>
+          <div>
+            <p className="membership-email">{username}@gmail.com</p>
+            <p className="membership-password">Password:{passwordInAsterisk}</p>
+          </div>
+        </div>
+        <hr className="hr-line" />
+        <div className="membership-container">
+          <p className="plan-details">Plan Details</p>
+          <p className="membership-premium">Premium</p>
+          <p className="ultra-hd">Ultra HD</p>
+        </div>
+        <hr className="hr-line" />
+        <div className="account-logout-container">
+          <button
+            onClick={onClickLogout}
+            className="account-logout"
+            type="button"
+          >
+            Logout
+          </button>
         </div>
       </div>
-      <hr />
-      <div>
-        <p>Plan details</p>
-        <div>
-          <p>Premium</p>
-          <p>Ultra HD</p>
-        </div>
-      </div>
-      <hr />
-      <button type="button" onClick={logoutFunc} className="logout-btn">
-        Logout
-      </button>
+      <Footer />
     </div>
   )
 }

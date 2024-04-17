@@ -13,22 +13,19 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class Originals extends Component {
+class TrendingNow extends Component {
   state = {
-    originals: [],
+    trendingNow: [],
     apiStatus: apiStatusConstants.initial,
   }
 
   componentDidMount() {
-    this.getOriginals()
+    this.getTrendingMovies()
   }
 
-  getOriginals = async () => {
-    this.setState({
-      apiStatus: apiStatusConstants.inProgress,
-    })
+  getTrendingMovies = async () => {
     const jwtToken = Cookies.get('jwt_token')
-    const apiUrl = `https://apis.ccbp.in/movies-app/originals`
+    const apiUrl = `https://apis.ccbp.in/movies-app/trending-movies`
     const options = {
       method: 'GET',
       headers: {
@@ -47,7 +44,7 @@ class Originals extends Component {
       }))
       // console.log(updatedData)
       this.setState({
-        originals: updatedData,
+        trendingNow: updatedData,
         apiStatus: apiStatusConstants.success,
       })
     } else {
@@ -58,36 +55,30 @@ class Originals extends Component {
   }
 
   onRetry = () => {
-    this.getOriginals()
+    this.getTrendingMovies()
   }
 
   renderFailureView = () => <FailureView onRetry={this.onRetry} />
 
   renderLoadingView = () => (
     <div className="loader-container">
-      <Loader
-        testid="loader"
-        type="TailSpin"
-        height={35}
-        width={380}
-        color=" #D81F26"
-      />
+      <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
   renderSuccessView = () => {
-    const {originals} = this.state
+    const {trendingNow} = this.state
     return (
       <>
         {/* <p className="json">{JSON.stringify(trendingNow)}</p> */}
         {/* <HomeVideos homeVideos={homeVideos} /> */}
 
-        <SlickMovieCard movies={originals} />
+        <SlickMovieCard movies={trendingNow} />
       </>
     )
   }
 
-  renderOriginals = () => {
+  renderTrendingNow = () => {
     const {apiStatus} = this.state
     switch (apiStatus) {
       case apiStatusConstants.success:
@@ -104,8 +95,8 @@ class Originals extends Component {
 
   render() {
     return (
-      <div className="trending-now-container">{this.renderOriginals()}</div>
+      <div className="trending-now-container">{this.renderTrendingNow()}</div>
     )
   }
 }
-export default Originals
+export default TrendingNow
