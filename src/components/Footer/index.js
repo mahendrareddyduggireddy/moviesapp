@@ -1,23 +1,25 @@
 import {FaGoogle, FaTwitter, FaInstagram, FaYoutube} from 'react-icons/fa'
+
 import './index.css'
 
-const Footer = () => (
-  <>
-    <div className="footer-container">
-      <button type="button" className="icon-button">
+const FooterSection = () => (
+  <div className="footer-container">
+    <ul className="contact-icons-container">
+      <li className="contact-icon">
         <FaGoogle />
-      </button>
-      <button type="button" className="icon-button">
+      </li>
+      <li className="contact-icon">
         <FaTwitter />
-      </button>
-      <button type="button" className="icon-button">
+      </li>
+      <li className="contact-icon">
         <FaInstagram />
-      </button>
-      <button type="button" className="icon-button">
+      </li>
+      <li className="contact-icon">
         <FaYoutube />
-      </button>
-    </div>
-    <p className="contact-us-footer">Contact us </p>
-  </>
+      </li>
+    </ul>
+    <p className="contact-text">Contact us</p>
+  </div>
 )
-export default Footer
+
+export default FooterSection

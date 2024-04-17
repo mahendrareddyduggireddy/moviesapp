@@ -2,7 +2,6 @@ import {Component} from 'react'
 import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
 import VideosSlider from '../SlickMovieCard/index'
-import './index.css'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -11,25 +10,25 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class TrendingSection extends Component {
-  state = {trendingNowData: [], apiStatus: apiStatusConstants.initial}
+class TopRatedSection extends Component {
+  state = {topRatedData: [], apiStatus: apiStatusConstants.initial}
 
   componentDidMount() {
-    this.getTrendingNowData()
+    this.getTopRatedData()
   }
 
-  getTrendingNowData = async () => {
+  getTopRatedData = async () => {
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
     const jwtToken = Cookies.get('jwt_token')
-    const trendingNowApiUrl = 'https://apis.ccbp.in/movies-app/trending-movies'
+    const topRatedApiUrl = 'https://apis.ccbp.in/movies-app/top-rated-movies'
     const options = {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
     }
-    const response = await fetch(trendingNowApiUrl, options)
+    const response = await fetch(topRatedApiUrl, options)
     if (response.ok) {
       const fetchedData = await response.json()
       const updatedData = fetchedData.results.map(eachMovie => ({
@@ -40,7 +39,7 @@ class TrendingSection extends Component {
         title: eachMovie.title,
       }))
       this.setState({
-        trendingNowData: updatedData,
+        topRatedData: updatedData,
         apiStatus: apiStatusConstants.success,
       })
     } else {
@@ -49,8 +48,8 @@ class TrendingSection extends Component {
   }
 
   renderSuccessView = () => {
-    const {trendingNowData} = this.state
-    return <VideosSlider videoData={trendingNowData} />
+    const {topRatedData} = this.state
+    return <VideosSlider videoData={topRatedData} />
   }
 
   renderLoadingView = () => (
@@ -70,7 +69,7 @@ class TrendingSection extends Component {
       <button
         type="button"
         className="failure-retry-button"
-        onClick={this.getTrendingNowData}
+        onClick={this.getTopRatedData}
       >
         Try Again
       </button>
@@ -98,4 +97,4 @@ class TrendingSection extends Component {
   }
 }
 
-export default TrendingSection
+export default TopRatedSection

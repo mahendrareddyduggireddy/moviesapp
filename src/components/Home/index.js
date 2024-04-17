@@ -1,16 +1,12 @@
 import {Component} from 'react'
-
 import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
-// import {Link} from 'react-router-dom'
-// import {AiOutlineClose} from 'react-icons/ai'
-import HomePoster from '../HomePoster'
 import Header from '../Header'
+import TrendingSection from '../TrendingNow/index'
+import TopRatedSection from '../TopRated/index'
+import VideosSlider from '../SlickMovieCard/index'
+import FooterSection from '../Footer/index'
 import './index.css'
-import FailureView from '../FailureView'
-import TrendingNow from '../TrendingNow'
-import Originals from '../Originals'
-import Footer from '../Footer'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -19,92 +15,144 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class Home extends Component {
-  state = {
-    initialPoster: {},
-    apiStatus: apiStatusConstants.initial,
-  }
+class HomeSection extends Component {
+  state = {originalsData: [], apiStatus: apiStatusConstants.initial}
 
   componentDidMount() {
-    this.getHomePagePoster()
+    this.getOriginalsData()
   }
 
-  getHomePagePoster = async () => {
-    this.setState({
-      apiStatus: apiStatusConstants.inProgress,
-    })
+  getOriginalsData = async () => {
+    this.setState({apiStatus: apiStatusConstants.inProgress})
+
     const jwtToken = Cookies.get('jwt_token')
-    const apiUrl = `https://apis.ccbp.in/movies-app/originals`
+    const originalsApiUrl = 'https://apis.ccbp.in/movies-app/originals'
     const options = {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
     }
-
-    const response = await fetch(apiUrl, options)
+    const response = await fetch(originalsApiUrl, options)
     if (response.ok === true) {
-      const data = await response.json()
-      // console.log(data)
-      const fetchedDataLength = data.results.length
-      const randomPoster =
-        data.results[Math.floor(Math.random() * fetchedDataLength)]
-      const updatedData = {
-        id: randomPoster.id,
-        backdropPath: randomPoster.backdrop_path,
-        title: randomPoster.title,
-        overview: randomPoster.overview,
-        posterPath: randomPoster.poster_path,
-      }
-      // console.log(updatedData)
+      const fetchedData = await response.json()
+      const updatedData = fetchedData.results.map(eachMovie => ({
+        id: eachMovie.id,
+        backdropPath: eachMovie.backdrop_path,
+        overview: eachMovie.overview,
+        posterPath: eachMovie.poster_path,
+        title: eachMovie.title,
+      }))
       this.setState({
-        initialPoster: {...updatedData},
+        originalsData: updatedData,
         apiStatus: apiStatusConstants.success,
       })
     } else {
-      this.setState({
-        apiStatus: apiStatusConstants.failure,
-      })
+      this.setState({apiStatus: apiStatusConstants.failure})
     }
   }
 
-  onRetry = () => {
-    this.getHomePagePoster()
-  }
+  renderPosterSuccessView = () => {
+    const {originalsData} = this.state
+    const randomNumber = Math.floor(Math.random() * (originalsData.length - 1))
+    const posterImage = originalsData[randomNumber]
 
-  renderFailureView = () => <FailureView onRetry={this.onRetry} />
-
-  renderLoadingView = () => (
-    <div className="loader-container">
-      <Loader
-        testid="loader"
-        type="TailSpin"
-        height={35}
-        width={380}
-        color=" #D81F26"
-      />
-    </div>
-  )
-
-  renderSuccessView = () => {
-    const {initialPoster} = this.state
     return (
-      <>
-        {/* <p className="json">{JSON.stringify(homeVideos)}</p> */}
-        <HomePoster poster={initialPoster} />
-      </>
+      <div
+        style={{backgroundImage: `url(${posterImage.backdropPath})`}}
+        className="bg-image"
+      >
+        <Header />
+        <div className="movie-heading-container">
+          <h1 className="poster-title">{posterImage.title}</h1>
+          <p className="poster-description">{posterImage.overview}</p>
+          <button type="button" className="play-button">
+            Play
+          </button>
+        </div>
+      </div>
     )
   }
 
-  renderHomePoster = () => {
+  renderPosterLoadingView = () => (
+    <div className="home-loader-container" testid="loader">
+      <Loader type="TailSpin" color="#D81F26" height={50} width={50} />
+    </div>
+  )
+
+  renderPosterFailureView = () => (
+    <div className="poster-failure-view">
+      <img
+        src="https://res.cloudinary.com/dc2b69ycq/image/upload/v1670040709/Movies%20App/alert-triangle_sc1zom.png"
+        alt="failure view"
+        className="poster-failure-image"
+      />
+      <p className="failure-title">Something went wrong. Please try again</p>
+      <button
+        type="button"
+        className="failure-retry-button"
+        onClick={this.getOriginalsData}
+      >
+        Try Again
+      </button>
+    </div>
+  )
+
+  renderPosterOutputView = () => {
     const {apiStatus} = this.state
+
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return this.renderSuccessView()
-      case apiStatusConstants.failure:
-        return this.renderFailureView()
+        return this.renderPosterSuccessView()
       case apiStatusConstants.inProgress:
-        return this.renderLoadingView()
+        return this.renderPosterLoadingView()
+      case apiStatusConstants.failure:
+        return this.renderPosterFailureView()
+
+      default:
+        return null
+    }
+  }
+
+  renderOriginalsLoadingView = () => (
+    <div className="loader-container" testid="loader">
+      <Loader type="TailSpin" color="#D81F26" height={50} width={50} />
+    </div>
+  )
+
+  renderOriginalsSuccessView = () => {
+    const {originalsData} = this.state
+    return <VideosSlider videoData={originalsData} />
+  }
+
+  renderOriginalsFailureView = () => (
+    <div className="failure-view">
+      <img
+        src="https://res.cloudinary.com/dc2b69ycq/image/upload/v1670040709/Movies%20App/alert-triangle_sc1zom.png"
+        alt="failure view"
+        className="poster-failure-image"
+      />
+      <p className="failure-title">Something went wrong. Please try again</p>
+      <button
+        type="button"
+        className="failure-retry-button"
+        onClick={this.getOriginalsData}
+      >
+        Try Again
+      </button>
+    </div>
+  )
+
+  renderOriginalsOutputView = () => {
+    const {apiStatus} = this.state
+
+    switch (apiStatus) {
+      case apiStatusConstants.success:
+        return this.renderOriginalsSuccessView()
+      case apiStatusConstants.inProgress:
+        return this.renderOriginalsLoadingView()
+      case apiStatusConstants.failure:
+        return this.renderOriginalsFailureView()
 
       default:
         return null
@@ -113,23 +161,27 @@ class Home extends Component {
 
   render() {
     return (
-      <div className="root-container">
-        <Header />
-        <div className="home-sizes-container">{this.renderHomePoster()}</div>
-        <div>
-          <div>
-            <h1 className="trending-now-heading">Trending Now</h1>
-            <TrendingNow />
+      <>
+        <div className="home-bg-container">
+          {this.renderPosterOutputView()}
+          <hr />
+          <h1 className="section-title">Trending Now</h1>
+          <div className="video-slider-container">
+            <TrendingSection />
           </div>
-          <div>
-            <h1 className="originals-heading">Originals</h1>
-            <Originals />
+          <h1 className="section-title">Top Rated</h1>
+          <div className="video-slider-container">
+            <TopRatedSection />
           </div>
+          <h1 className="section-title">Originals</h1>
+          <div className="video-slider-container">
+            {this.renderOriginalsOutputView()}
+          </div>
+          <hr className="ruler" />
         </div>
-        <Footer />
-      </div>
+        <FooterSection />
+      </>
     )
   }
 }
-export default Home
-
+export default HomeSection

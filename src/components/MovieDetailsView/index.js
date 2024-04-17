@@ -1,17 +1,11 @@
-import Loader from 'react-loader-spinner'
 import {Component} from 'react'
 import Cookies from 'js-cookie'
-import {Link} from 'react-router-dom'
-
-import Footer from '../Footer'
-import FailureView from '../FailureView'
-// import PlayVideoView from '../PlayVideoView'
-
+import Loader from 'react-loader-spinner'
+import format from 'date-fns/format'
 import Header from '../Header'
-// import Footer from '../Footer'
-
+import MovieItem from '../MovieDetail/index'
+import FooterSection from '../Footer/index'
 import './index.css'
-import MovieDetail from '../MovieDetail'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -20,73 +14,83 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class MovieDetailView extends Component {
+class MovieDetailSection extends Component {
   state = {
+    movieDetailData: [],
+    similarMovieDetailData: [],
+    genresDetailData: [],
+    spokenLanguageDetailData: [],
     apiStatus: apiStatusConstants.initial,
-    movieDetails: [],
-    genres: [],
-    spokenLanguages: [],
-    similarMovies: [],
   }
 
   componentDidMount() {
-    this.getMovieDetails()
+    this.getMovieDetailData()
   }
 
-  getMovieDetails = async () => {
-    this.setState({apiStatus: apiStatusConstants.inProgress})
+  getMovieData = data => ({
+    id: data.id,
+    backdropPath: data.backdrop_path,
+    overview: data.overview,
+    posterPath: data.poster_path,
+    title: data.title,
+    adult: data.adult,
+    budget: data.budget,
+    releaseDate: data.release_date,
+    runtime: data.runtime,
+    voteAverage: data.vote_average,
+    voteCount: data.vote_count,
+  })
+
+  getSimilarMoviesData = data => ({
+    id: data.id,
+    backdropPath: data.backdrop_path,
+    posterPath: data.poster_path,
+    title: data.title,
+  })
+
+  getGenresData = data => ({
+    id: data.id,
+    name: data.name,
+  })
+
+  getSpokenLanguageData = data => ({
+    id: data.id,
+    englishName: data.english_name,
+  })
+
+  getMovieDetailData = async () => {
     const {match} = this.props
     const {params} = match
     const {id} = params
+
+    this.setState({apiStatus: apiStatusConstants.inProgress})
+
     const jwtToken = Cookies.get('jwt_token')
-    const apiUrl = `https://apis.ccbp.in/movies-app/movies/${id}`
+    const movieDetailApiUrl = `https://apis.ccbp.in/movies-app/movies/${id}`
     const options = {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
-      method: 'GET',
     }
-    const response = await fetch(apiUrl, options)
-    if (response.ok === true) {
-      const data = await response.json()
-      const updatedData = [data.movie_details].map(each => ({
-        id: each.id,
-        backdropPath: each.backdrop_path,
-        budget: each.budget,
-        title: each.title,
-        overview: each.overview,
-        originalLanguage: each.original_language,
-        releaseDate: each.release_date,
-        count: each.vote_count,
-        rating: each.vote_average,
-        runtime: each.runtime,
-        posterPath: each.poster_path,
-      }))
-      // console.log(updatedData)
-      const genresData = data.movie_details.genres.map(each => ({
-        id: each.id,
-        name: each.name,
-      }))
-      // console.log(genresData)
-      const updatedSimilarData = data.movie_details.similar_movies.map(
-        each => ({
-          id: each.id,
-          posterPath: each.poster_path,
-          title: each.title,
-        }),
+    const response = await fetch(movieDetailApiUrl, options)
+    if (response.ok) {
+      const fetchedData = await response.json()
+      const updatedMovieData = this.getMovieData(fetchedData.movie_details)
+      const genresData = fetchedData.movie_details.genres.map(eachData =>
+        this.getGenresData(eachData),
       )
-      // console.log(updatedSimilarData)
-      const updatedLanguagesData = data.movie_details.spoken_languages.map(
-        each => ({
-          id: each.id,
-          language: each.english_name,
-        }),
+      const similarMovieData = fetchedData.movie_details.similar_movies.map(
+        eachData => this.getSimilarMoviesData(eachData),
+      )
+      const spokenLanguageData = fetchedData.movie_details.spoken_languages.map(
+        eachData => this.getSpokenLanguageData(eachData),
       )
       this.setState({
-        movieDetails: updatedData,
-        genres: genresData,
-        spokenLanguages: updatedLanguagesData,
-        similarMovies: updatedSimilarData.slice(0, 6),
+        movieDetailData: updatedMovieData,
+        similarMovieDetailData: similarMovieData,
+        genresDetailData: genresData,
+        spokenLanguageDetailData: spokenLanguageData,
         apiStatus: apiStatusConstants.success,
       })
     } else {
@@ -94,157 +98,157 @@ class MovieDetailView extends Component {
     }
   }
 
-  onRetry = () => {
-    this.getMovieDetails()
+  runtime = () => {
+    const {movieDetailData} = this.state
+    const hours = Math.floor(movieDetailData.runtime / 60)
+    const minutes = Math.floor(movieDetailData.runtime) % 60
+
+    return `${hours}h ${minutes}m`
   }
 
-  renderFailureView = () => <FailureView onRetry={this.onRetry} />
+  releasedYear = () => {
+    const {movieDetailData} = this.state
+    const {releaseDate} = movieDetailData
+    if (releaseDate !== undefined) {
+      return format(new Date(releaseDate), 'yyyy')
+    }
+    return null
+  }
 
-  renderLoadingView = () => (
-    <div className="loader-container">
-      <Loader
-        testid="loader"
-        type="TailSpin"
-        height={35}
-        width={380}
-        color=" #D81F26"
-      />
-    </div>
-  )
+  formattedDate = () => {
+    const {movieDetailData} = this.state
+    const {releaseDate} = movieDetailData
+    if (releaseDate !== undefined) {
+      return format(new Date(releaseDate), 'do MMMM yyyy')
+    }
+    return null
+  }
 
   renderSuccessView = () => {
-    const {movieDetails, genres, spokenLanguages, similarMovies} = this.state
-    const newMovieDetails = {...movieDetails[0]}
-    const {releaseDate, count, rating, budget} = newMovieDetails
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ]
-    const d = new Date(releaseDate)
-    const monthName = months[d.getMonth()]
-    const date = new Date(releaseDate)
-    const year = date.getFullYear()
-    const day = date.getDay().toString()
-    let dateEndingWord
-    if (day.endsWith('1')) {
-      dateEndingWord = 'st'
-    } else if (day.endsWith('2')) {
-      dateEndingWord = 'nd'
-    } else if (day.endsWith('3')) {
-      dateEndingWord = 'rd'
-    } else {
-      dateEndingWord = 'th'
-    }
+    const {
+      movieDetailData,
+      similarMovieDetailData,
+      genresDetailData,
+      spokenLanguageDetailData,
+    } = this.state
+
+    const censorRating = movieDetailData.adult ? 'A' : 'U/A'
+
     return (
-      <>
-        {/* <p className="json">{JSON.stringify(movieDetails)}</p> */}
-        {/* <PlayVideoView movieDetails={movieDetails} /> */}
-        <div className="">
-          <div className="">
-            {movieDetails.map(each => (
-              <MovieDetail movieDetails={each} key={each.id} />
-            ))}
+      <div className="movie-detail-bg-container">
+        <div
+          style={{backgroundImage: `url(${movieDetailData.backdropPath})`}}
+          className="bg-image"
+        >
+          <Header />
+          <div className="movie-heading-container">
+            <h1 className="poster-title">{movieDetailData.title}</h1>
+            <div className="time-year-container">
+              <p className="year-time">{this.runtime()}</p>
+              <p className="censor-criteria">{censorRating}</p>
+              <p className="year-time">{this.releasedYear()}</p>
+            </div>
+            <p className="poster-description">{movieDetailData.overview}</p>
+            <button type="button" className="play-button">
+              Play
+            </button>
           </div>
         </div>
-        <div className="additional-movie-info-container additional-info-sm-container">
-          <ul className="each-genre-ul-container">
-            <h1 className="movie-info-genre-heading">Genres</h1>
-            {genres.map(eachGenre => (
-              <li className="movie-info-each-genre" key={eachGenre.id}>
-                {eachGenre.name}
-              </li>
+        <hr />
+        <div className="movie-detail-flex-container">
+          <div className="movie-content-details">
+            <h1 className="movie-content-title">Genres</h1>
+
+            {genresDetailData.map(eachData => (
+              <p className="movie-content-description" key={eachData.id}>
+                {eachData.name}
+              </p>
             ))}
-          </ul>
-          <ul className="each-genre-ul-container">
-            <h1 className="movie-info-genre-heading">Audio Available</h1>
-            {spokenLanguages.map(eachAudio => (
-              <li className="movie-info-each-genre" key={eachAudio.id}>
-                {eachAudio.language}
-              </li>
-            ))}
-          </ul>
-          <div className="each-genre-ul-container">
-            <h1 className="movie-info-rating-count-heading">Rating Count</h1>
-            <p className="movie-info-rating-count">{count}</p>
-            {/* <p>{JSON.stringify(movieDetails)}</p> */}
-            {/* <p>{JSON.stringify(newMovieDetails)}</p> */}
-            <h1 className="movie-info-rating-avg-heading">Rating Average</h1>
-            <p className="movie-info-rating">{rating}</p>
           </div>
-          <div className="each-genre-ul-container">
-            <h1 className="movie-info-budget-heading">Budget</h1>
-            <p className="movie-info-budget">{budget}</p>
-            {/* <p>{JSON.stringify(movieDetails)}</p> */}
-            {/* <p>{JSON.stringify(newMovieDetails)}</p> */}
-            <h1 className="movie-info-release-date">Release Date </h1>
-            <p>
-              <span className="movie-info-date">{day}</span>
-              <span className="movie-info-date-end">{dateEndingWord}</span>
-              <span className="movie-info-month-name">{monthName}</span>
-              <span className=" movie-info-year">{year}</span>
+          <div className="movie-content-details">
+            <h1 className="movie-content-title">Audio Available</h1>
+
+            {spokenLanguageDetailData.map(eachData => (
+              <p className="movie-content-description" key={eachData.id}>
+                {eachData.englishName}
+              </p>
+            ))}
+          </div>
+
+          <div className="movie-content-details">
+            <h1 className="movie-content-title">Rating Count</h1>
+            <p className="movie-content-description">
+              {movieDetailData.voteCount}
+            </p>
+            <h1 className="movie-content-title">Rating Average</h1>
+            <p className="movie-content-description">
+              {movieDetailData.voteAverage}
             </p>
           </div>
+          <div className="movie-content-details">
+            <h1 className="movie-content-title">Budget</h1>
+            <p className="movie-content-description">
+              {movieDetailData.budget}
+            </p>
+            <h1 className="movie-content-title">Release Date</h1>
+            <p className="movie-content-description">{this.formattedDate()}</p>
+          </div>
         </div>
-        <div className="similar-movies-container">
-          <h1 className="more-like-this">More like this</h1>
-          <ul className="popular-ul-container similar-ul-container">
-            {similarMovies.map(each => (
-              <Link to={`/movies/${each.id}`} key={each.id} target="blank">
-                <li className="popular-li-item" key={each.id}>
-                  <img
-                    className="popular-poster"
-                    src={each.posterPath}
-                    alt={each.title}
-                  />
-                </li>
-              </Link>
-            ))}
-          </ul>
-        </div>
-      </>
+        <h1 className="more-movies-title">More like this</h1>
+        <ul className="more-movies-container">
+          {similarMovieDetailData.map(eachData => (
+            <MovieItem movieData={eachData} key={eachData.id} />
+          ))}
+        </ul>
+
+        <FooterSection />
+      </div>
     )
   }
 
-  renderVideoDetailView = () => {
+  renderLoadingView = () => (
+    <div className="movie-detail-loader-container" testid="loader">
+      <Loader type="TailSpin" color="#D81F26" height={50} width={50} />
+    </div>
+  )
+
+  renderFailureView = () => (
+    <div className="no-result-view-container">
+      <img
+        src="https://res.cloudinary.com/dc2b69ycq/image/upload/v1670002135/Movies%20App/Failure_l6kgfg.png"
+        alt="failure view"
+        className="failure-image"
+      />
+      <p className="failure-text">Something went wrong. Please try again</p>
+      <button
+        type="button"
+        className="retry-button"
+        onClick={this.getMovieDetailData}
+      >
+        Try Again
+      </button>
+    </div>
+  )
+
+  renderMovieDetailOutputView = () => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
         return this.renderSuccessView()
-      case apiStatusConstants.failure:
-        return this.renderFailureView()
       case apiStatusConstants.inProgress:
         return this.renderLoadingView()
+      case apiStatusConstants.failure:
+        return this.renderFailureView()
+
       default:
         return null
     }
   }
 
   render() {
-    return (
-      <div className="dummy">
-        <Header />
-        <div className="root-container">
-          <div
-            className="video-details-view-container"
-            data-testid="videoItemDetails"
-          >
-            {this.renderVideoDetailView()}
-          </div>
-          <Footer />
-        </div>
-      </div>
-    )
+    return <>{this.renderMovieDetailOutputView()}</>
   }
 }
-export default MovieDetailView
+
+export default MovieDetailSection

@@ -1,50 +1,29 @@
-.main-popular-bg-black-container {
+.popular-bg-container {
   background-color: #131313;
 }
-
-.popular-result-container {
-  padding: 10px;
-  height: 100vh;
-  height: 100%;
-}
-
-.popular-ul-container {
+.popular-item-list-container {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-  margin: 0px;
-  text-align: center;
-  padding-left: 20px;
-  padding-right: 20px;
   list-style-type: none;
-}
-.popular-li-item {
-  padding: 5px;
-}
-/* .popular-poster {
-  height: 250px;
-  width: 180px;
-  border-radius: 8px;
-} */
-.popular-poster {
-  height: 100px;
-  width: 90px;
-  border-radius: 8px;
+  padding-top: 32px;
+  padding-bottom: 32px;
+  padding-left: 10%;
+  padding-right: 10%;
+  margin-top: 0px;
 }
 @media screen and (min-width: 768px) {
-  .popular-poster {
-    height: 250px;
-    width: 180px;
-    border-radius: 8px;
-  }
-  .popular-li-item {
-    padding: 10px;
+  .popular-item-list-container {
+    padding-top: 32px;
+    padding-bottom: 32px;
   }
 }
-.explore-movies-here {
-  color: #ffffff;
-  padding-left: 30px;
-  margin-bottom: 10px;
+.popular-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #131313;
 }

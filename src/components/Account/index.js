@@ -1,51 +1,49 @@
 import Cookies from 'js-cookie'
 import Header from '../Header'
-import Footer from '../Footer'
+import FooterSection from '../Footer/index'
 import './index.css'
 
-const Account = props => {
-  const username = localStorage.getItem('username')
-  const password = localStorage.getItem('password')
-
-  const passwordInAsterisk = '*'.repeat(password.length)
+const AccountSection = props => {
   const onClickLogout = () => {
     const {history} = props
     Cookies.remove('jwt_token')
     history.replace('/login')
   }
-
   return (
-    <div className="account-root-container">
+    <>
       <Header />
-      <div className="account-details-container">
-        <h1 className="account-heading">Account</h1>
-        <hr className="hr-line" />
-        <div className="member-details-container">
-          <p className="membership-heading">Membership</p>
-          <div>
-            <p className="membership-email">{username}@gmail.com</p>
-            <p className="membership-password">Password:{passwordInAsterisk}</p>
+      <div className="account-section-bg-container">
+        <h1 className="account-title">Account</h1>
+        <hr className="ruler" />
+        <div className="membership-container">
+          <p className="account-description">Membership:</p>
+          <div className="user-details-container">
+            <p className="account-details">rahul@gmail.com</p>
+            <p className="account-password">Password : ************</p>
           </div>
         </div>
-        <hr className="hr-line" />
+        <hr className="ruler" />
         <div className="membership-container">
-          <p className="plan-details">Plan Details</p>
-          <p className="membership-premium">Premium</p>
-          <p className="ultra-hd">Ultra HD</p>
+          <p className="account-description">Plan details:</p>
+          <p className="account-details">Premium</p>{' '}
+          <p className="ultra-text">Ultra HD</p>
         </div>
-        <hr className="hr-line" />
-        <div className="account-logout-container">
+        <hr className="ruler" />
+        <div className="button-container">
           <button
-            onClick={onClickLogout}
-            className="account-logout"
+            className="Logout-button"
             type="button"
+            onClick={onClickLogout}
           >
             Logout
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+      <div className="account-footer">
+        <FooterSection />
+      </div>
+    </>
   )
 }
-export default Account
+
+export default AccountSection

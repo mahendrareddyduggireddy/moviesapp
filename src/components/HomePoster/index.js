@@ -43,7 +43,8 @@ const HomePoster = props => {
             Play
           </button>
         </div>
-      </div> */}
+      </div>
+      */}
     </>
   )
 }
